@@ -1,82 +1,97 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Button, ScrollView, Text, View} from 'react-native';
-import SerialPortAPI from 'react-native-serial-port-api';
-
-function useEventListener(eventType, handler) {
-  const handerRef = useRef(handler);
-
-  useEffect(() => {
-    function internalHandler(e) {
-      return handerRef.current(e);
-    }
-
-    document.addEventListener(eventType, internalHandler);
-
-    return () => document.removeEventListener(eventType, internalHandler);
-  }, [eventType]);
-}
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Button, ScrollView, Text, View } from "react-native";
+import SerialPortAPI from "react-native-serial-port-api";
+import { Heading, VStack, Input } from "native-base";
 
 export default function LandingScreen() {
-  const [output, setOutput] = useState([{text: 'test'}, {text: 'test2'}]);
+  const [output, setOutput] = useState("");
+  const [tokens, setTokens] = useState("1");
+  const [serialPort, setSerialPort] = useState(null);
 
-  function handlerReceived(buff) {
-    setOutput(...output, {
-      text: `Received: ${buff.toString('hex').toUpperCase()}`,
-    });
+  useEffect(() => {
+    async function init() {
+      const serialCom = await SerialPortAPI.open("/dev/ttyS2", {
+        baudRate: 115200,
+      });
+      serialCom.onReceived(handlerReceived);
+      setSerialPort(serialCom);
+    }
+
+    init();
+    return () => close();
+  }, []);
+
+  function close() {
+    serialPort.close();
   }
+
+  function appendLog(prefix, msg) {
+    setOutput(`${output} ${prefix}: ${msg} \n`);
+  }
+
+  function printHexMsg(msg) {
+    let out = "";
+    msg = msg.split("");
+    for (let i = 0; i < msg.length; i++) {
+
+      if (i % 2 === 1) {
+        out += msg[i] + " ";
+      } else {
+        out += msg[i];
+      }
+    }
+    return out;
+  }
+
+  const handlerReceived = useCallback((buff) => {
+    let hex = printHexMsg(buff.toString("hex").toUpperCase());
+    appendLog("Received", hex);
+  });
 
   async function sendCmd(cmd) {
     try {
-      const serialPort = await SerialPortAPI.open('/dev/ttyS2', {
-        baudRate: 115200,
-      });
-      serialPort.onReceived(handlerReceived);
       await serialPort.send(cmd);
-
-      setOutput(...output, {text: `Sent: ${cmd}`});
-      serialPort.close();
+      appendLog("Sent", printHexMsg(cmd));
     } catch (error) {
-      console.log(error);
-      setOutput(output + {text: `Error: ${JSON.stringify(error)}`});
+      appendLog("Error", JSON.stringify(error));
     }
+  }
+
+  function convertToHexMsg() {
+    let header = "FE";
+    let tail = "EF";
+    let cmdType = "02";
+    let cmd = header + cmdType;
+    let checkSum = [];
+    checkSum.push(cmdType);
+    let sum = 0;
+    for (let i = tokens.length; i < 4; i++) {
+      cmd += "00";
+    }
+    for (let i = 0; i < tokens.length; i++) {
+      cmd += "0" + tokens[i];
+      checkSum.push("0" + tokens[i]);
+    }
+    for (let i = 0; i < checkSum.length; i++) {
+      sum = sum ^ parseInt(checkSum[i], 16);
+    }
+    sum = sum.toString(16);
+    if (sum.length === 1) {
+      sum = "0" + sum.toString(16);
+    }
+    cmd += sum + tail;
+    appendLog("test", sendCmd(cmd));
   }
 
   return (
     <View>
-      <ScrollView>
-        <ScrollView
-          style={{height: 200, backgroundColor: '#fff'}}
-          nestedScrollEnabled={true}>
-          {output.map((text, i) => {
-            return <Text key={i}>{JSON.stringify(text)}</Text>;
-          })}
-        </ScrollView>
-        <Button title={'1 Token'} onPress={() => sendCmd('FE020000000103EF')} />
-        <Button
-          title={'10 Token'}
-          onPress={() => sendCmd('FE020000010003EF')}
-        />
-        <Button
-          title={'50 Token'}
-          onPress={() => sendCmd('FE020000050007EF')}
-        />
-        <Button
-          title={'100 Token'}
-          onPress={() => sendCmd('FE020001000003EF')}
-        />
-        <Button
-          title={'Add'}
-          onPress={() => {
-            setOutput(...output, {text: 'test'});
-          }}
-        />
-        <Button
-          title={'Clear'}
-          onPress={() => {
-            setOutput({text: ''});
-          }}
-        />
+      <ScrollView style={{ height: "80%", backgroundColor: "#fff" }}>
+        <Heading size={"xl"}>{output}</Heading>
       </ScrollView>
+      <Input placeholder="Input" onChangeText={setTokens} value={tokens} />
+      <Button title={"Get Tokens"} onPress={() => convertToHexMsg()} />
+      <Button title={"Test"} onPress={() => appendLog("Test", "test")} />
+      <Button title={"Clear"} onPress={() => setOutput("")} />
     </View>
   );
 }

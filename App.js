@@ -7,12 +7,13 @@
  */
 
 import React from 'react';
-import type {Node} from 'react';
+import {NativeBaseProvider} from 'native-base';
 import LandingScreen from './Screens/LandingScreen';
-// import ManualConnection from './Screens/ManualConnection';
 
-const App: () => Node = () => {
-  return <LandingScreen />;
-};
-
-export default App;
+export default function App() {
+  return (
+    <NativeBaseProvider>
+      <LandingScreen />
+    </NativeBaseProvider>
+  );
+}
