@@ -5,7 +5,7 @@ import { Heading, VStack, Input } from "native-base";
 
 export default function LandingScreen() {
   const [output, setOutput] = useState("");
-  const [tokens, setTokens] = useState("1");
+  const [tokens, setTokens] = useState();
   const [serialPort, setSerialPort] = useState(null);
 
   useEffect(() => {
@@ -22,7 +22,8 @@ export default function LandingScreen() {
   }, []);
 
   function close() {
-    serialPort.close();
+    if (serialPort)
+      serialPort.close();
   }
 
   function appendLog(prefix, msg) {
@@ -57,41 +58,57 @@ export default function LandingScreen() {
     }
   }
 
-  function convertToHexMsg() {
-    let header = "FE";
-    let tail = "EF";
-    let cmdType = "02";
-    let cmd = header + cmdType;
+  function openAndClose(cmdType, dataSize, data) {
+    let header = "55AA";
     let checkSum = [];
+    let dataInHex = ("00" + parseInt(data).toString(16).toUpperCase()).slice(-2);
+    let cmd = header + dataSize + cmdType + dataInHex;
+    checkSum.push(dataSize);
     checkSum.push(cmdType);
+    checkSum.push(dataInHex);
+    cmd += calculateCheckSum(checkSum);
+    appendLog("纸钞机", printHexMsg(cmd));
+    sendCmd(cmd);
+  }
+
+  function getTokenCmd(cmdType, dataSize) {
+    let header = "55AA";
+    let checkSum = [];
+    let tokensInHex = (
+      "0000" + parseInt(tokens ? tokens : 0).toString(16).toUpperCase()
+    ).slice(-4);
+    let cmd = header + dataSize + cmdType + tokensInHex;
+    checkSum.push(dataSize);
+    checkSum.push(cmdType);
+    checkSum.push(tokensInHex.substring(0, 2));
+    checkSum.push(tokensInHex.substring(2, 4));
+    cmd += calculateCheckSum(checkSum);
+    appendLog("取币", printHexMsg(cmd));
+    sendCmd(cmd);
+  }
+
+
+  function calculateCheckSum(checkSum) {
     let sum = 0;
-    for (let i = tokens.length; i < 4; i++) {
-      cmd += "00";
-    }
-    for (let i = 0; i < tokens.length; i++) {
-      cmd += "0" + tokens[i];
-      checkSum.push("0" + tokens[i]);
-    }
     for (let i = 0; i < checkSum.length; i++) {
       sum = sum ^ parseInt(checkSum[i], 16);
     }
-    sum = sum.toString(16);
-    if (sum.length === 1) {
-      sum = "0" + sum.toString(16);
-    }
-    cmd += sum + tail;
-    appendLog("test", sendCmd(cmd));
+    sum = sum.toString(16).toUpperCase();
+    return sum;
   }
 
   return (
     <View>
-      <ScrollView style={{ height: "80%", backgroundColor: "#fff" }}>
+      <ScrollView style={{ height: "100%", backgroundColor: "#fff" }}>
         <Heading size={"xl"}>{output}</Heading>
+        <Input placeholder="在此输入出币数" onChangeText={setTokens} value={tokens} />
+        <Button title={"取币"} onPress={() => getTokenCmd("C0", "04")} />
+        <Button title={"开启纸钞"} onPress={() => openAndClose("C1", "03", "01")} />
+        <Button title={"关闭纸钞"} onPress={() => openAndClose("C1", "03", "00")} />
+        <Button title={"Test"} onPress={() => appendLog("Test", "test")} />
+        <Button title={"Clear"} onPress={() => setOutput("")} />
       </ScrollView>
-      <Input placeholder="Input" onChangeText={setTokens} value={tokens} />
-      <Button title={"Get Tokens"} onPress={() => convertToHexMsg()} />
-      <Button title={"Test"} onPress={() => appendLog("Test", "test")} />
-      <Button title={"Clear"} onPress={() => setOutput("")} />
+
     </View>
   );
 }
