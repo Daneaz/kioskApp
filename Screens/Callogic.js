@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, ScrollView, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, ScrollView, View } from "react-native";
 import SerialPortAPI from "react-native-serial-port-api";
-import { Heading, VStack, Input } from "native-base";
+import { Heading, Input } from "native-base";
 
 export default function LandingScreen() {
   const [output, setOutput] = useState("");
