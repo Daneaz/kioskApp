@@ -1,36 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import getEnvironment from "./environment";
-import * as AlertMsg from "../Components/Alert";
-
-export const TOKEN = "token";
-export const USER = "user";
-
+import getEnvironment from "./Environment";
+import * as Constant from "../Constants/Constant";
 
 const APIURL = getEnvironment.apiUrl;
 const APIVERSION = "v1/";
 
-export const StoreData = async (key, value) => {
-  try {
-    await AsyncStorage.setItem(key, value);
-  } catch (err) {
-    AlertMsg.error(err);
-  }
+export const storeData = async (key, value) => {
+  await AsyncStorage.setItem(key, value);
 };
 
-export const RemoveData = async (key) => {
-  try {
-    await AsyncStorage.removeItem(key);
-  } catch (err) {
-    AlertMsg.error(err);
-  }
+export const removeData = async (key) => {
+  await AsyncStorage.removeItem(key);
 };
 
-export const GetData = async (key) => {
-  try {
-    return await AsyncStorage.getItem(key);
-  } catch (err) {
-    AlertMsg.error(err);
-  }
+export const getData = async (key) => {
+  return await AsyncStorage.getItem(key);
 };
 
 //RESTful API fetch
@@ -57,7 +41,7 @@ export const fetchAPI = async (method, url, jsonObj) => {
   return new Promise(async function(resolve, reject) {
     try {
       //add token into header if token existed
-      let token = await GetData(TOKEN);
+      let token = await getData(Constant.TOKEN);
       //send request
       const resp = await fetch(getApiUrl(APIVERSION + url), getApiConf(method, jsonObj, token));
 
@@ -79,8 +63,8 @@ export const fetchAPI = async (method, url, jsonObj) => {
           reject(respJson);
           break;
         case 401:
-          await RemoveData(TOKEN);
-          await RemoveData(USER);
+          await removeData(Constant.TOKEN);
+          await removeData(Constant.USER);
           reject(respJson);
           break;
         case 403:

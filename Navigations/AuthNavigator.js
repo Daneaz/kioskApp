@@ -12,7 +12,6 @@ import FOMOPayScreen from "../Screens/FOMOPayScreen";
 export default function AuthNavigator(props) {
   switch (props.role) {
     case "Machine":
-      return (<MachineStackScreen />);
     default:
       return (<AuthStackScreen />);
   }
@@ -33,18 +32,6 @@ export function AuthStackScreen() {
   );
 }
 
-const MachineStack = createStackNavigator();
 
-function MachineStackScreen() {
-  return (
-    <MachineStack.Navigator>
-      <MachineStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-      <MachineStack.Screen name="Purchase" component={PurchaseScreen} options={{ headerShown: false }} />
-      <MachineStack.Screen name="RetrieveToken" component={RetrieveTokenScreen} options={{ headerShown: false }} />
-      <MachineStack.Screen name="QRCode" component={QRCodeScreen} options={{ headerShown: false }} />
-      <MachineStack.Screen name="FOMOPay" component={FOMOPayScreen} options={{ headerShown: false }} />
-    </MachineStack.Navigator>
-  );
-}
 
 

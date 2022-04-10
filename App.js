@@ -10,14 +10,16 @@ import React, { useEffect, useState } from "react";
 import { NativeBaseProvider, Text } from "native-base";
 import { NavigationContainer } from "@react-navigation/native";
 import AuthNavigator from "./Navigations/AuthNavigator";
-import { GetData, USER } from "./Services/utility";
+import { getData } from "./Services/Utility";
+import { GlobalContextProvider } from "./States/GlobalState";
+import { USER } from "./Constants/Constant";
 
 export default function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
-      let user = await GetData(USER);
+      let user = await getData(USER);
       setUser(user);
     }
 
@@ -26,9 +28,11 @@ export default function App() {
 
   return (
     <NativeBaseProvider>
-      <NavigationContainer fallback={<Text>Loading...</Text>}>
-        <AuthNavigator role={user} />
-      </NavigationContainer>
+      <GlobalContextProvider>
+        <NavigationContainer fallback={<Text>Loading...</Text>}>
+          <AuthNavigator role={user} />
+        </NavigationContainer>
+      </GlobalContextProvider>
     </NativeBaseProvider>
   );
 

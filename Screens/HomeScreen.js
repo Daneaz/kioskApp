@@ -1,11 +1,36 @@
-import React from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { Image, ImageBackground, StatusBar, StyleSheet, View } from "react-native";
 import ImageButton from "../Components/ImageButton";
 import { VStack } from "native-base";
-
+import { CN, EN, START, TICK } from "../Constants/Constant";
+import { GlobalContext } from "../States/GlobalState";
 
 export default function HomeScreen({ navigation }) {
+  const [retrieve, setRetrieve] = useState(require("../Assets/Images/retrieve-en.png"));
+  const [purchase, setPurchase] = useState(require("../Assets/Images/purchase-en.png"));
+  const [state, dispatch] = useContext(GlobalContext);
+
+  const timer = useRef();
+
+  useEffect(() => {
+    if (!state.isRunning) {
+      clearInterval(timer.current);
+    }
+  }, [state.isRunning]);
+
+
+  function onLanguagePress() {
+    if (state.language === CN) {
+      dispatch({ type: EN });
+      setRetrieve(require("../Assets/Images/retrieve-en.png"));
+      setPurchase(require("../Assets/Images/purchase-en.png"));
+    } else {
+      dispatch({ type: CN });
+      setRetrieve(require("../Assets/Images/retrieve-cn.png"));
+      setPurchase(require("../Assets/Images/purchase-cn.png"));
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -13,16 +38,24 @@ export default function HomeScreen({ navigation }) {
       <ImageBackground source={require("../Assets/Images/bg.png")} resizeMode="stretch" style={styles.image}>
         <VStack style={styles.languageBtnPosition}>
           <ImageButton source={require("../Assets/Images/language.png")} imageBtnStyle={styles.languageBtn}
-                       onPress={() => console.log("press")} />
+                       onPress={() => onLanguagePress()} />
         </VStack>
         <VStack style={styles.bannerPosition}>
           <Image source={require("../Assets/Images/banner.png")} style={styles.banner} />
         </VStack>
         <VStack space={6} style={styles.buttonsPosition}>
-          <ImageButton source={require("../Assets/Images/retrieve-en.png")} imageBtnStyle={styles.buttons}
-                       onPress={() => navigation.navigate("RetrieveToken")} />
-          <ImageButton source={require("../Assets/Images/purchase-en.png")} imageBtnStyle={styles.buttons}
-                       onPress={() => navigation.navigate("Purchase")} />
+          <ImageButton source={retrieve} imageBtnStyle={styles.buttons}
+                       onPress={() => {
+                         navigation.navigate("RetrieveToken");
+                         dispatch({ type: START });
+                         timer.current = setInterval(() => dispatch({ type: TICK }), 1000);
+                       }} />
+          <ImageButton source={purchase} imageBtnStyle={styles.buttons}
+                       onPress={() => {
+                         navigation.navigate("Purchase");
+                         dispatch({ type: START });
+                         timer.current = setInterval(() => dispatch({ type: TICK }), 1000);
+                       }} />
         </VStack>
       </ImageBackground>
     </View>

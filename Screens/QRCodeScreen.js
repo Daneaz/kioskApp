@@ -1,29 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { HStack, Text, VStack } from "native-base";
 import BasicLayout from "../Components/BasicLayout";
 import { ImageBackground, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { fetchAPI } from "../Services/utility";
-import * as AlertMsg from "../Components/Alert";
+import { fetchAPI } from "../Services/Utility";
+import MessageDialog from "../Components/MessageDialog";
+import { GlobalContext } from "../States/GlobalState";
+import { CN } from "../Constants/Constant";
 
-export default function QRCodeScreen({ navigation, route }) {
-  const [timer, setTimer] = useState(120);
-  const [qrCode, setQrCode] = useState("null");
-  const [transId, setTransId] = useState("null");
-  const en = require("../Assets/Images/purchase-bg-en.png");
-  const cn = require("../Assets/Images/purchase-bg-cn.png");
+export default function QRCodeScreen({ route }) {
+  const [qrCode, setQrCode] = useState(null);
+  const [transId, setTransId] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const [type, setType] = useState(null);
+  const [lang, setLang] = useState();
+
+  const statusTimer = useRef();
+  const timeoutTimer = useRef();
+
+  const [state] = useContext(GlobalContext);
 
   useEffect(() => {
-
-  }, []);
+    setLang(state.language);
+  }, [state.language]);
 
   useEffect(() => {
-    GenerateQRCode();
+    generateQRCode();
+    return () => {
+      clearInterval(statusTimer.current);
+      clearInterval(timeoutTimer.current);
+      PushStatusToFail();
+    };
   }, []);
 
-  async function GenerateQRCode() {
-    fetchAPI("POST", `tokenRetrieveMgt/tokenRetrieveQRCodeGenerator`, { token: route.params.token }).then(result => {
+  async function generateQRCode() {
+    try {
+      let result = await fetchAPI("POST", `tokenRetrieveMgt/tokenRetrieveQRCodeGenerator`, { token: route.params.token });
       let code = {
         noOfToken: result.token,
         uniqueId: result.uniqueId,
@@ -31,51 +44,57 @@ export default function QRCodeScreen({ navigation, route }) {
       };
       setQrCode(JSON.stringify(code));
       setTransId(result._id);
-      let timeout = setTimeout(() => {
-        CheckStatus(result._id);
-      }, 4000);
-      return () => {
-        clearInterval(timeout);
-      };
-    }).catch(error => {
-      AlertMsg.error(error);
-    });
+      timeoutTimer.current = setTimeout(() => {
+        checkStatus(result._id);
+      }, 5000);
+    } catch (err) {
+      setType("ERROR");
+      setMsg(err);
+    }
   }
 
-  function CheckStatus(transId) {
-    fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`).then(result => {
+  async function checkStatus(transId) {
+    try {
+      let result = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
       if (result) {
-        AlertMsg.info("Success");
+        setType("SUCCESS");
+        setMsg("Token retrieved!!!");
       } else {
-        setTimeout(() => {
-          CheckStatus(transId);
+        statusTimer.current = setTimeout(() => {
+          checkStatus(transId);
         }, 2000);
       }
-    }).catch(error => {
-      AlertMsg.error(error);
-    });
+    } catch (err) {
+      setType("ERROR");
+      setMsg(err);
+    }
   }
 
   async function PushStatusToFail() {
     try {
       await fetchAPI("GET", `tokenRetrieveMgt/pushToFail/${transId}`);
-    } catch (error) {
-      AlertMsg.error(error);
+    } catch (err) {
+      setType("ERROR");
+      setMsg(err);
     }
   }
 
   return (
-    <BasicLayout source={en} text={timer}>
+    <BasicLayout
+      source={lang === CN ? require("../Assets/Images/purchase-bg-cn.png") : require("../Assets/Images/purchase-bg-en.png")}
+      text={state.time}>
       <VStack space={5} alignItems="center" paddingTop={5}>
         <HStack justifyContent={"center"}>
           <ImageBackground source={require("../Assets/Images/qr-code-bg.png")} style={styles.image}>
             <HStack justifyContent={"center"} marginTop={20}>
-              <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={162} />
+              {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={162} />}
             </HStack>
           </ImageBackground>
         </HStack>
-        <Text style={styles.timerText}>Please use Play United App to scan the QR code</Text>
+        <Text
+          style={styles.timerText}>{lang === CN ? "请用 Play United App 扫码完成取币" : "Please use Play United App to scan the QR code"}</Text>
       </VStack>
+      <MessageDialog type={type} msg={msg} close={() => setMsg(null)} />
     </BasicLayout>
   );
 }

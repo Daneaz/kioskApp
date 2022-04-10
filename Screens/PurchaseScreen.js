@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import PurchaseBanner from "../Components/PurchaseBanner";
 import { VStack } from "native-base";
 import BasicLayout from "../Components/BasicLayout";
-import { fetchAPI } from "../Services/utility";
-import * as AlertMsg from "../Components/Alert";
+import { fetchAPI } from "../Services/Utility";
+import MessageDialog from "../Components/MessageDialog";
 import { ScrollView } from "react-native";
+import { GlobalContext } from "../States/GlobalState";
+import { CN } from "../Constants/Constant";
 
 export default function PurchaseScreen({ navigation }) {
-  const [timer, setTimer] = useState(120);
   const [promotionList, setPromotionList] = React.useState(null);
-  const en = require("../Assets/Images/purchase-bg-en.png");
-  const cn = require("../Assets/Images/purchase-bg-cn.png");
+  const [msg, setMsg] = useState(null);
+  const [lang, setLang] = useState();
+
+  const [state] = useContext(GlobalContext);
+
+  useEffect(() => {
+    setLang(state.language);
+  }, [state.language]);
 
   useEffect(() => {
     getPromotionList();
@@ -22,13 +29,15 @@ export default function PurchaseScreen({ navigation }) {
       setPromotionList(promotion);
     }).catch(error => {
       setTimeout(() => {
-        AlertMsg.error(error);
+        setMsg(error);
       }, 1000);
     });
   }
 
   return (
-    <BasicLayout source={en} text={timer}>
+    <BasicLayout
+      source={lang === CN ? require("../Assets/Images/purchase-bg-cn.png") : require("../Assets/Images/purchase-bg-en.png")}
+      text={state.time} clearTimer={true}>
       <ScrollView style={{ maxHeight: 380 }}>
         <VStack space={5} alignItems="center" paddingTop={2}>
           {
@@ -39,6 +48,7 @@ export default function PurchaseScreen({ navigation }) {
           }
         </VStack>
       </ScrollView>
+      <MessageDialog type={"INFO"} msg={msg} close={() => setMsg(null)} />
     </BasicLayout>
   );
 }
