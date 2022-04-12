@@ -8,6 +8,7 @@ import { fetchAPI } from "../Services/Utility";
 import MessageDialog from "../Components/MessageDialog";
 import { GlobalContext } from "../States/GlobalState";
 import { CN } from "../Constants/Constant";
+import calculate from "../Services/DimensionAdapter";
 
 export default function QRCodeScreen({ route }) {
   const [qrCode, setQrCode] = useState(null);
@@ -27,10 +28,9 @@ export default function QRCodeScreen({ route }) {
 
   useEffect(() => {
     generateQRCode();
-    return () => {
+    return async () => {
       clearInterval(statusTimer.current);
       clearInterval(timeoutTimer.current);
-      PushStatusToFail();
     };
   }, []);
 
@@ -59,10 +59,11 @@ export default function QRCodeScreen({ route }) {
       if (result) {
         setType("SUCCESS");
         setMsg("Token retrieved!!!");
+        //TODO dispense token
       } else {
         statusTimer.current = setTimeout(() => {
           checkStatus(transId);
-        }, 2000);
+        }, 5000);
       }
     } catch (err) {
       setType("ERROR");
@@ -83,16 +84,16 @@ export default function QRCodeScreen({ route }) {
     <BasicLayout
       source={lang === CN ? require("../Assets/Images/purchase-bg-cn.png") : require("../Assets/Images/purchase-bg-en.png")}
       text={state.time}>
-      <VStack space={5} alignItems="center" paddingTop={5}>
+      <VStack space={20} alignItems="center" paddingTop={5}>
         <HStack justifyContent={"center"}>
           <ImageBackground source={require("../Assets/Images/qr-code-bg.png")} style={styles.image}>
-            <HStack justifyContent={"center"} marginTop={20}>
-              {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={162} />}
+            <HStack justifyContent={"center"} marginTop={calculate(18)}>
+              {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={570} />}
             </HStack>
           </ImageBackground>
         </HStack>
-        <Text
-          style={styles.timerText}>{lang === CN ? "请用 Play United App 扫码完成取币" : "Please use Play United App to scan the QR code"}</Text>
+        <Text fontSize={calculate(15)}
+              style={styles.text}>{lang === CN ? "请用 Play United App 扫码完成取币" : "Please use Play United App to scan the QR code"}</Text>
       </VStack>
       <MessageDialog type={type} msg={msg} close={() => setMsg(null)} />
     </BasicLayout>
@@ -102,13 +103,11 @@ export default function QRCodeScreen({ route }) {
 
 const styles = StyleSheet.create({
   image: {
-    width: 305,
-    height: 292,
-    resizeMode: "contain",
+    width: calculate(255),
+    height: calculate(255),
   },
-  timerText: {
-    width: 250,
+  text: {
     textAlign: "center",
-    fontSize: 15,
+    maxWidth: calculate(200),
   },
 });

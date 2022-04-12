@@ -6,6 +6,7 @@ import { Text, VStack } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { GlobalContext } from "../States/GlobalState";
 import { RESET } from "../Constants/Constant";
+import calculate from "../Services/DimensionAdapter";
 
 export default function BasicLayout(props) {
   const navigation = useNavigation();
@@ -54,44 +55,44 @@ export default function BasicLayout(props) {
 const styles = StyleSheet.create({
   image: {
     width: "100%",
-    height: 160,
+    height: calculate(160),
   },
   whiteBg: {
     width: "100%",
     height: "100%",
   },
   timerPosition: {
-    marginTop: 5,
-    marginRight: 10,
+    marginTop: calculate(5),
+    marginRight: calculate(10),
     alignItems: "flex-end",
   },
   timer: {
-    margin: 10,
-    width: 87,
-    height: 37,
+    margin: calculate(10),
+    width: calculate(87),
+    height: calculate(37),
     resizeMode: "stretch",
   },
   timerText: {
     textAlign: "center",
-    paddingTop: 10,
+    paddingTop: calculate(25),
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: calculate(20),
     color: "white",
   },
   homePosition: {
     position: "absolute",
     right: "42%",
-    bottom: "41%",
+    bottom: "43%",
   },
   homeBtn: {
-    width: 50,
-    height: 50,
+    width: calculate(50),
+    height: calculate(50),
     resizeMode: "stretch",
   },
   backBtn: {
-    margin: 15,
-    width: 24,
-    height: 20,
+    margin: calculate(15),
+    width: calculate(24),
+    height: calculate(20),
   },
 
 });

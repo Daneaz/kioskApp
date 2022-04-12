@@ -4,6 +4,7 @@ import { Box, Button, HStack, Modal, VStack } from "native-base";
 import { fetchAPI } from "../Services/Utility";
 import { GlobalContext } from "../States/GlobalState";
 import { CN } from "../Constants/Constant";
+import calculate from "../Services/DimensionAdapter";
 
 
 export default function PurchaseBanner(props) {
@@ -34,11 +35,13 @@ export default function PurchaseBanner(props) {
           <VStack>
             <ImageBackground source={require("../Assets/Images/promotion-title-holder.png")}
                              style={styles.promotionTitle}>
-              <Image source={require("../Assets/Images/minigame-icon.png")} style={styles.miniGame} />
+              <Image source={require("../Assets/Images/minigame-icon.png")} style={styles.miniGame}
+                     alt={"Image not found"} />
               <Text style={styles.promotionTitleText}>{promotion.name}</Text>
             </ImageBackground>
-            <HStack space={7} my={1} mx={5}>
-              <Image source={require("../Assets/Images/purchase-icon.png")} style={styles.icon} />
+            <HStack space={10} my={5} mx={10}>
+              <Image source={require("../Assets/Images/purchase-icon.png")} style={styles.icon}
+                     alt={"Image not found"} />
               <Text style={styles.text}>{`${promotion.tokens} ${tokenLang}`}</Text>
               <Box style={styles.box}>
                 <Text style={styles.textMoney}>{`SGD ${promotion.sellingPrice}`}</Text>
@@ -48,7 +51,7 @@ export default function PurchaseBanner(props) {
         </ImageBackground>
       </TouchableOpacity>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} size="lg">
-        <Modal.Content maxWidth={350}>
+        <Modal.Content maxWidth={calculate(350)}>
           <Modal.CloseButton />
           <Modal.Header>New Order</Modal.Header>
           <Modal.Body>
@@ -82,55 +85,55 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   banner: {
-    width: 326,
-    height: 76,
-    borderRadius: 20,
+    width: calculate(326),
+    height: calculate(76),
+    borderRadius: calculate(20),
     resizeMode: "cover",
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: calculate(28),
+    height: calculate(28),
   },
   promotionTitle: {
     flexDirection: "row",
-    maxWidth: 350,
-    minWidth: 111,
-    height: 20,
+    maxWidth: calculate(350),
+    minWidth: calculate(111),
+    height: calculate(20),
     alignSelf: "flex-end",
     resizeMode: "contain",
   },
   miniGame: {
-    margin: 2,
-    width: 17,
-    height: 14,
+    margin: calculate(2),
+    width: calculate(17),
+    height: calculate(14),
   },
   promotionTitleText: {
-    margin: 2,
+    margin: calculate(2),
     fontWeight: "bold",
-    fontSize: 10,
+    fontSize: calculate(10),
     color: "white",
   },
   text: {
-    paddingLeft: 10,
+    paddingLeft: calculate(10),
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: calculate(20),
     color: "white",
   },
   textMoney: {
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 17,
+    fontSize: calculate(17),
     color: "orange",
-    paddingTop: 3,
+    paddingTop: calculate(3),
   },
   box: {
     position: "absolute",
-    right: 5,
-    borderRadius: 7,
-    shadowRadius: 5,
-    shadowOpacity: 10,
-    width: 80,
-    height: 30,
+    right: calculate(5),
+    borderRadius: calculate(7),
+    shadowRadius: calculate(5),
+    shadowOpacity: calculate(10),
+    width: calculate(80),
+    height: calculate(30),
     backgroundColor: "white",
   },
 

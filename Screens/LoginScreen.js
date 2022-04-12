@@ -9,6 +9,7 @@ import Colors from "../Constants/Colors";
 import { ENV } from "@env";
 import MessageDialog from "../Components/MessageDialog";
 import * as Constant from "../Constants/Constant";
+import calculate from "../Services/DimensionAdapter";
 
 export default function LoginScreen({ navigation }) {
   const [msg, setMsg] = useState(null);
@@ -79,7 +80,7 @@ export default function LoginScreen({ navigation }) {
               Login
             </Button>
             <View style={styles.rowContent}>
-              <Text style={{ fontSize: 10 }}>
+              <Text style={{ fontSize: calculate(10) }}>
                 {`${ENV} Build Version: 20220328`}</Text>
             </View>
           </VStack>
@@ -92,10 +93,12 @@ export default function LoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   font: {
-    fontSize: 17, color: Colors.iosBlue,
+    fontSize: calculate(17),
+    color: Colors.iosBlue,
   },
   rowContent: {
-    flexDirection: "row", justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
 
