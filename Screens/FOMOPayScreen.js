@@ -44,43 +44,6 @@ export default function FOMOPayScreen({ route, navigation }) {
   }
 
   return (
-    // <VStack>
-    //   <StatusBar hidden={true} />
-    //   <HStack>
-    //     <ImageBackground
-    //       source={require("../Assets/Images/fomopay-purchase.png")}
-    //       style={styles.image}>
-    //       <ImageButton imageBtnStyle={styles.backBtn} source={require("../Assets/Images/backBtn.png")}
-    //                    onPress={() => navigation.goBack()} />
-    //       <Image
-    //         source={lang === CN ? require("../Assets/Images/fomopay-purchase-title.png") : require("../Assets/Images/fomopay-purchase-title.png")}
-    //         style={styles.purchaseTitle} alt={"Image not found"}/>
-    //
-    //       <VStack style={styles.timerPosition}>
-    //         <ImageBackground source={require("../Assets/Images/timer.png")} style={styles.timer}>
-    //           <Text style={styles.timerText}>{`${state.time}s`}</Text>
-    //         </ImageBackground>
-    //       </VStack>
-    //     </ImageBackground>
-    //   </HStack>
-    //   <VStack style={styles.whiteBg}>
-    //     <VStack style={{ height: "75%" }}>
-    //       <WebView
-    //         source={{
-    //           uri: route.params.url,
-    //         }}
-    //       />
-    //     </VStack>
-    //     <VStack style={styles.homePosition}>
-    //       <ImageButton source={require("../Assets/Images/home.png")} imageBtnStyle={styles.homeBtn}
-    //                    onPress={() => {
-    //                      dispatch({ type: RESET });
-    //                      navigation.navigate("Home");
-    //                    }} />
-    //     </VStack>
-    //   </VStack>
-    //   <MessageDialog type={type} msg={msg} close={() => setMsg(null)} />
-    // </VStack>
     <BasicLayout
       source={lang === CN ? require("../Assets/Images/purchase-bg-cn.png") : require("../Assets/Images/purchase-bg-en.png")}
       text={state.time}>

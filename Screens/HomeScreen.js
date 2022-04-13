@@ -7,6 +7,8 @@ import { GlobalContext } from "../States/GlobalState";
 import SerialPortAPI from "react-native-serial-port-api";
 import MessageDialog from "../Components/MessageDialog";
 import calculate from "../Services/DimensionAdapter";
+import { formatHexMsg } from "../Services/SerialService";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
   const [lang, setLang] = useState();
@@ -16,6 +18,13 @@ export default function HomeScreen({ navigation }) {
 
   const timer = useRef();
   const serialCom = useRef();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused && serialCom) {
+      init();
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!state.isRunning) {
@@ -35,35 +44,17 @@ export default function HomeScreen({ navigation }) {
     }
   }
 
-  useEffect(() => {
-    init();
-  }, []);
-
-
   async function init() {
     try {
       serialCom.current = await SerialPortAPI.open("/dev/ttyS2", {
         baudRate: 115200,
       });
       serialCom.current.onReceived(handlerReceived);
+
     } catch (error) {
       setType("ERROR");
       setMsg(error.toString());
     }
-  }
-
-  function formatHexMsg(msg) {
-    let out = "";
-    msg = msg.split("");
-    for (let i = 0; i < msg.length; i++) {
-
-      if (i % 2 === 1) {
-        out += msg[i] + " ";
-      } else {
-        out += msg[i];
-      }
-    }
-    return out;
   }
 
   const handlerReceived = useCallback((buff) => {
@@ -71,66 +62,6 @@ export default function HomeScreen({ navigation }) {
     console.log("Received", hex);
   });
 
-
-  async function executeCmd(cmd) {
-    try {
-      await serialCom.current.send(cmd);
-      console.log(formatHexMsg(cmd));
-    } catch (error) {
-      console.log(`Error ${JSON.stringify(error)}`);
-    }
-  }
-
-  function openAndClose(cmdType, dataSize, data) {
-    let header = "55AA";
-    let checkSum = [];
-    let dataInHex = ("00" + parseInt(data).toString(16).toUpperCase()).slice(-2);
-    let cmd = header + dataSize + cmdType + dataInHex;
-    checkSum.push(dataSize);
-    checkSum.push(cmdType);
-    checkSum.push(dataInHex);
-    cmd += calculateCheckSum(checkSum);
-    console.log(formatHexMsg(cmd));
-    executeCmd(cmd);
-  }
-
-  function dispenseToken(token) {
-    constructHexCmd("C0", "04", token);
-  }
-
-  function openOrCloseCashier(open) {
-    if (open) {
-      openAndClose("C1", "03", "01");
-    } else {
-      openAndClose("C1", "03", "00");
-    }
-  }
-
-  function constructHexCmd(cmdType, dataSize, token) {
-    let header = "55AA";
-    let checkSum = [];
-    let tokensInHex = (
-      "0000" + parseInt(token).toString(16).toUpperCase()
-    ).slice(-4);
-    let cmd = header + dataSize + cmdType + tokensInHex;
-    checkSum.push(dataSize);
-    checkSum.push(cmdType);
-    checkSum.push(tokensInHex.substring(0, 2));
-    checkSum.push(tokensInHex.substring(2, 4));
-    cmd += calculateCheckSum(checkSum);
-    console.log(formatHexMsg(cmd));
-    executeCmd(cmd);
-  }
-
-
-  function calculateCheckSum(checkSum) {
-    let sum = 0;
-    for (let i = 0; i < checkSum.length; i++) {
-      sum = sum ^ parseInt(checkSum[i], 16);
-    }
-    sum = sum.toString(16).toUpperCase();
-    return sum;
-  }
 
   return (
     <View style={styles.container}>
@@ -148,7 +79,7 @@ export default function HomeScreen({ navigation }) {
             source={lang === CN ? require("../Assets/Images/retrieve-cn.png") : require("../Assets/Images/retrieve-en.png")}
             imageBtnStyle={styles.buttons}
             onPress={() => {
-              navigation.navigate("RetrieveToken");
+              navigation.navigate("RetrieveToken", { serialCom: serialCom });
               dispatch({ type: START });
               timer.current = setInterval(() => dispatch({ type: TICK }), 1000);
             }} />
@@ -157,14 +88,15 @@ export default function HomeScreen({ navigation }) {
             imageBtnStyle={styles.buttons}
             onPress={() => {
               setType("INFO");
-              setMsg("Coming Soon!!!");
+              setMsg("Coming Soon!!! Please use our Play United App to purchase now");
               // navigation.navigate("Purchase");
               // dispatch({ type: START });
               // timer.current = setInterval(() => dispatch({ type: TICK }), 1000);
             }} />
         </VStack>
       </ImageBackground>
-      <MessageDialog type={type} msg={msg} close={() => setMsg(null)} />
+      <MessageDialog type={type} msg={msg} close={() => setMsg(null)}
+                     onConfirm={() => navigation.navigate("Disconnected")} />
     </View>
   );
 }

@@ -10,13 +10,12 @@ import { CN } from "../Constants/Constant";
 import InputModel from "../Components/InputModel";
 import calculate from "../Services/DimensionAdapter";
 
-export default function RetrieveTokenScreen({ navigation }) {
+export default function RetrieveTokenScreen({ navigation, route }) {
   const [lang, setLang] = useState();
   const [tokenLang, setTokenLang] = useState();
   const [open, setOpen] = useState();
 
   const [state] = useContext(GlobalContext);
-
 
   useEffect(() => {
     setLang(state.language);
@@ -35,30 +34,45 @@ export default function RetrieveTokenScreen({ navigation }) {
           <ImageButton source={require("../Assets/Images/token-10.png")}
                        text={`10 ${tokenLang}`} imageBtnStyle={styles.image}
                        imageBtnTextStyle={styles.tokenText}
-                       onPress={() => navigation.navigate("QRCode", { token: "10" })} />
+                       onPress={() => navigation.navigate("QRCode", {
+                         token: "10",
+                         serialCom: route.params.serialCom,
+                       })} />
           <ImageButton source={require("../Assets/Images/token-20.png")} text={`20 ${tokenLang}`}
                        imageBtnStyle={styles.image}
                        imageBtnTextStyle={styles.tokenText}
-                       onPress={() => navigation.navigate("QRCode", { token: "20" })} />
+                       onPress={() => navigation.navigate("QRCode", {
+                         token: "20",
+                         serialCom: route.params.serialCom,
+                       })} />
           <ImageButton source={require("../Assets/Images/token-30.png")} text={`30 ${tokenLang}`}
                        imageBtnStyle={styles.image}
                        imageBtnTextStyle={styles.tokenText}
-                       onPress={() => navigation.navigate("QRCode", { token: "30" })} />
+                       onPress={() => navigation.navigate("QRCode", {
+                         token: "30",
+                         serialCom: route.params.serialCom,
+                       })} />
         </HStack>
         <HStack space={5} justifyContent={"center"}>
           <ImageButton source={require("../Assets/Images/token-50.png")} text={`50 ${tokenLang}`}
                        imageBtnStyle={styles.image}
                        imageBtnTextStyle={styles.tokenText}
-                       onPress={() => navigation.navigate("QRCode", { token: "50" })} />
+                       onPress={() => navigation.navigate("QRCode", {
+                         token: "50",
+                         serialCom: route.params.serialCom,
+                       })} />
           <ImageButton source={require("../Assets/Images/token-100.png")} text={`100 ${tokenLang}`}
                        imageBtnStyle={styles.image} imageBtnTextStyle={styles.tokenText}
-                       onPress={() => navigation.navigate("QRCode", { token: "100" })} />
+                       onPress={() => navigation.navigate("QRCode", {
+                         token: "100",
+                         serialCom: route.params.serialCom,
+                       })} />
           <ImageButton source={require("../Assets/Images/token-more.png")} text={lang === CN ? "自定义" : "Others"}
                        imageBtnStyle={styles.image}
                        imageBtnTextStyle={styles.tokenText} onPress={() => setOpen(true)} />
         </HStack>
       </VStack>
-      <InputModel open={open} close={() => setOpen(false)} />
+      <InputModel open={open} close={() => setOpen(false)} serialCom={route.params.serialCom} />
     </BasicLayout>
   );
 }

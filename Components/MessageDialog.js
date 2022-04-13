@@ -6,6 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import { RESET } from "../Constants/Constant";
 import { GlobalContext } from "../States/GlobalState";
 import calculate from "../Services/DimensionAdapter";
+import TextEnricher from "./TextEnricher";
+import TextEnrichImageButton from "./TextEnrichImageButton";
 
 export default function MessageDialog(props) {
   const navigation = useNavigation();
@@ -31,13 +33,14 @@ export default function MessageDialog(props) {
       <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={common.close}
                    onPress={props.close} />
       <ImageBackground source={require("../Assets/Images/msg-dialog-blue.png")} style={common.title}>
-        <Text style={common.infoText}>Info</Text>
+        <TextEnricher style={common.infoText}>Info</TextEnricher>
       </ImageBackground>
       <VStack space={1} alignItems={"center"}>
         <Image source={require("../Assets/Images/msg-dialog-info.png")} style={common.icon} alt={"Image not found"} />
         <Text style={common.msgText}>{props.msg}</Text>
-        <ImageButton source={require("../Assets/Images/msg-dialog-btn-blue.png")} imageBtnStyle={common.btn} text={"OK"}
-                     imageBtnTextStyle={common.infoText} onPress={props.close} />
+        <TextEnrichImageButton source={require("../Assets/Images/msg-dialog-btn-blue.png")} imageBtnStyle={common.btn}
+                               text={"OK"}
+                               imageBtnTextStyle={common.infoText} onPress={props.close} />
       </VStack>
     </ImageBackground>;
   }
@@ -48,15 +51,15 @@ export default function MessageDialog(props) {
       <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={common.close}
                    onPress={props.close} />
       <ImageBackground source={require("../Assets/Images/msg-dialog-yellow.png")} style={common.title}>
-        <Text style={common.infoText}>Warning</Text>
+        <TextEnricher style={common.warningText}>Warning</TextEnricher>
       </ImageBackground>
       <VStack space={1} alignItems={"center"}>
         <Image source={require("../Assets/Images/msg-dialog-warning.png")} style={common.icon}
                alt={"Image not found"} />
         <Text style={common.msgText}>{props.msg}</Text>
-        <ImageButton source={require("../Assets/Images/msg-dialog-btn-yellow.png")} imageBtnStyle={common.btn}
-                     text={"OK"}
-                     imageBtnTextStyle={common.infoText} onPress={props.close} />
+        <TextEnrichImageButton source={require("../Assets/Images/msg-dialog-btn-yellow.png")} imageBtnStyle={common.btn}
+                               text={"OK"}
+                               imageBtnTextStyle={common.warningText} onPress={props.close} />
       </VStack>
     </ImageBackground>;
   }
@@ -67,13 +70,14 @@ export default function MessageDialog(props) {
       <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={common.close}
                    onPress={props.close} />
       <ImageBackground source={require("../Assets/Images/msg-dialog-red.png")} style={common.title}>
-        <Text style={common.infoText}>Error</Text>
+        <TextEnricher style={common.errorText}>Error</TextEnricher>
       </ImageBackground>
       <VStack space={1} alignItems={"center"}>
         <Image source={require("../Assets/Images/msg-dialog-error.png")} style={common.icon} alt={"Image not found"} />
         <Text style={common.msgText}>{props.msg}</Text>
-        <ImageButton source={require("../Assets/Images/msg-dialog-btn-red.png")} imageBtnStyle={common.btn} text={"OK"}
-                     imageBtnTextStyle={common.infoText} onPress={props.close} />
+        <TextEnrichImageButton source={require("../Assets/Images/msg-dialog-btn-red.png")} imageBtnStyle={common.btn}
+                               text={"OK"}
+                               imageBtnTextStyle={common.errorText} onPress={() => onConfirm()} />
       </VStack>
     </ImageBackground>;
   }
@@ -84,21 +88,30 @@ export default function MessageDialog(props) {
       <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={success.close}
                    onPress={props.close} />
       <ImageBackground source={require("../Assets/Images/msg-dialog-green.png")} style={success.title}>
-        <Text style={success.infoText}>Success</Text>
+        <TextEnricher style={success.titleText}>Success</TextEnricher>
       </ImageBackground>
       <VStack space={1} alignItems={"center"}>
         <Image source={require("../Assets/Images/msg-dialog-success.png")} style={success.icon}
                alt={"Image not found"} />
         <Text style={success.msgText}>{props.msg}</Text>
-        <ImageButton source={require("../Assets/Images/msg-dialog-btn-green.png")} imageBtnStyle={success.btn}
-                     text={"OK"} imageBtnTextStyle={common.infoText}
-                     onPress={() => {
-                       props.close();
-                       dispatch({ type: RESET });
-                       navigation.navigate("Home");
-                     }} />
+        <TextEnrichImageButton source={require("../Assets/Images/msg-dialog-btn-green.png")} imageBtnStyle={success.btn}
+                               text={"OK"} imageBtnTextStyle={common.infoText}
+                               onPress={() => {
+                                 props.close();
+                                 dispatch({ type: RESET });
+                                 navigation.navigate("Home");
+                               }} />
       </VStack>
     </ImageBackground>;
+  }
+
+  function onConfirm() {
+    if (props.onConfirm) {
+      props.close();
+      props.onConfirm();
+    } else {
+      props.close();
+    }
   }
 
   return (
@@ -132,6 +145,23 @@ const common = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
+    textShadowColor: "#3385FF",
+  },
+  warningText: {
+    margin: calculate(6),
+    fontSize: calculate(20),
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+    textShadowColor: "#FFD138",
+  },
+  errorText: {
+    margin: calculate(6),
+    fontSize: calculate(20),
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+    textShadowColor: "#FF347B",
   },
   icon: {
     width: calculate(140),
@@ -168,12 +198,13 @@ const success = StyleSheet.create({
     width: calculate(25),
     height: calculate(25),
   },
-  infoText: {
+  titleText: {
     margin: calculate(5),
     fontSize: calculate(20),
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
+    textShadowColor: "#0C9E7E",
   },
   icon: {
     width: calculate(140),
@@ -183,7 +214,10 @@ const success = StyleSheet.create({
   },
   msgText: {
     textAlign: "center",
-    top: calculate(40),
+    top: calculate(38),
+    marginBottom: calculate(5),
+    maxWidth: calculate(250),
+    fontSize: calculate(15),
   },
   btn: {
     width: calculate(178),

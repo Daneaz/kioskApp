@@ -8,6 +8,7 @@ import PurchaseScreen from "../Screens/PurchaseScreen";
 import RetrieveTokenScreen from "../Screens/RetrieveTokenScreen";
 import QRCodeScreen from "../Screens/QRCodeScreen";
 import FOMOPayScreen from "../Screens/FOMOPayScreen";
+import DisconnectScreen from "../Screens/DisconnectScreen";
 
 export default function AuthNavigator(props) {
   switch (props.role) {
@@ -28,6 +29,7 @@ export function AuthStackScreen() {
       <AuthStack.Screen name="RetrieveToken" component={RetrieveTokenScreen} options={{ headerShown: false }} />
       <AuthStack.Screen name="QRCode" component={QRCodeScreen} options={{ headerShown: false }} />
       <AuthStack.Screen name="FOMOPay" component={FOMOPayScreen} options={{ headerShown: false }} />
+      <AuthStack.Screen name="Disconnected" component={DisconnectScreen} options={{ headerShown: false }} />
     </AuthStack.Navigator>
   );
 }

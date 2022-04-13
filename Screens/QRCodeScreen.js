@@ -9,6 +9,7 @@ import MessageDialog from "../Components/MessageDialog";
 import { GlobalContext } from "../States/GlobalState";
 import { CN } from "../Constants/Constant";
 import calculate from "../Services/DimensionAdapter";
+import { dispenseToken } from "../Services/SerialService";
 
 export default function QRCodeScreen({ route }) {
   const [qrCode, setQrCode] = useState(null);
@@ -18,7 +19,6 @@ export default function QRCodeScreen({ route }) {
   const [lang, setLang] = useState();
 
   const statusTimer = useRef();
-  const timeoutTimer = useRef();
 
   const [state] = useContext(GlobalContext);
 
@@ -30,9 +30,15 @@ export default function QRCodeScreen({ route }) {
     generateQRCode();
     return async () => {
       clearInterval(statusTimer.current);
-      clearInterval(timeoutTimer.current);
     };
   }, []);
+
+  useEffect(() => {
+    return async () => {
+      if (transId)
+        await pushStatusToFail(transId);
+    };
+  }, [transId]);
 
   async function generateQRCode() {
     try {
@@ -44,7 +50,7 @@ export default function QRCodeScreen({ route }) {
       };
       setQrCode(JSON.stringify(code));
       setTransId(result._id);
-      timeoutTimer.current = setTimeout(() => {
+      statusTimer.current = setInterval(() => {
         checkStatus(result._id);
       }, 5000);
     } catch (err) {
@@ -55,15 +61,14 @@ export default function QRCodeScreen({ route }) {
 
   async function checkStatus(transId) {
     try {
-      let result = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
-      if (result) {
+      let token = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
+      if (token) {
+        clearInterval(statusTimer.current);
         setType("SUCCESS");
-        setMsg("Token retrieved!!!");
-        //TODO dispense token
-      } else {
-        statusTimer.current = setTimeout(() => {
-          checkStatus(transId);
-        }, 5000);
+        setMsg("Payment success!!!");
+        setTimeout(async () => {
+          await handleDispenseToken(transId, token);
+        }, 500);
       }
     } catch (err) {
       setType("ERROR");
@@ -71,7 +76,40 @@ export default function QRCodeScreen({ route }) {
     }
   }
 
-  async function PushStatusToFail() {
+
+  async function handleDispenseToken(transId, token) {
+    try {
+      let result = await dispenseToken(route.params.serialCom, token, setMsg, setType);
+      if (result) {
+        await pushStatusToSuccess(transId);
+      } else {
+        await proceedWithRefund(transId);
+      }
+    } catch (error) {
+      setType("ERROR");
+      setMsg(JSON.stringify(error));
+    }
+  }
+
+  async function proceedWithRefund(transId) {
+    try {
+      await fetchAPI("GET", `tokenRetrieveMgt/refund/${transId}`);
+    } catch (err) {
+      setType("ERROR");
+      setMsg(err);
+    }
+  }
+
+  async function pushStatusToSuccess(transId) {
+    try {
+      await fetchAPI("GET", `tokenRetrieveMgt/pushToSuccess/${transId}`);
+    } catch (err) {
+      setType("ERROR");
+      setMsg(err);
+    }
+  }
+
+  async function pushStatusToFail(transId) {
     try {
       await fetchAPI("GET", `tokenRetrieveMgt/pushToFail/${transId}`);
     } catch (err) {
