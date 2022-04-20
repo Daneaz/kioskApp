@@ -6,31 +6,42 @@
  * @flow strict-local
  */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { NativeBaseProvider, Text } from "native-base";
 import { NavigationContainer } from "@react-navigation/native";
-import AuthNavigator from "./Navigations/AuthNavigator";
-import { getData } from "./Services/Utility";
 import { GlobalContextProvider } from "./States/GlobalState";
-import { USER } from "./Constants/Constant";
+import { createStackNavigator } from "@react-navigation/stack";
+import LoginScreen from "./Screens/LoginScreen";
+import HomeScreen from "./Screens/HomeScreen";
+import PurchaseScreen from "./Screens/PurchaseScreen";
+import RetrieveTokenScreen from "./Screens/RetrieveTokenScreen";
+import QRCodeScreen from "./Screens/QRCodeScreen";
+import FOMOPayScreen from "./Screens/FOMOPayScreen";
+import DisconnectScreen from "./Screens/DisconnectScreen";
 
 export default function App() {
-  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      let user = await getData(USER);
-      setUser(user);
-    }
+  const AuthStack = createStackNavigator();
 
-    fetchData();
-  }, []);
+  function AuthStackScreen() {
+    return (
+      <AuthStack.Navigator>
+        <AuthStack.Screen name="LogIn" component={LoginScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="Purchase" component={PurchaseScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="RetrieveToken" component={RetrieveTokenScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="QRCode" component={QRCodeScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="FOMOPay" component={FOMOPayScreen} options={{ headerShown: false }} />
+        <AuthStack.Screen name="Disconnected" component={DisconnectScreen} options={{ headerShown: false }} />
+      </AuthStack.Navigator>
+    );
+  }
 
   return (
     <NativeBaseProvider>
       <GlobalContextProvider>
         <NavigationContainer fallback={<Text>Loading...</Text>}>
-          <AuthNavigator role={user} />
+          <AuthStackScreen />
         </NavigationContainer>
       </GlobalContextProvider>
     </NativeBaseProvider>

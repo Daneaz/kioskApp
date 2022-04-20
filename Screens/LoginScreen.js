@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, FormControl, Input, Text, VStack } from "native-base";
+import { StyleSheet, Text, View } from "react-native";
+import { Button, FormControl, Input, VStack } from "native-base";
 import { Formik } from "formik";
 import * as yup from "yup";
 import InputLayout from "../Components/InputLayout";
@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     async function getUser() {
       let user = await getData(Constant.USER);
-      if (user) {
+      if (user.role.name === Constant.MACHINE) {
         navigation.navigate("Home");
       }
     }
@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
   function onLogin(values, actions) {
     fetchAPI("POST", "authMgt/auth", values).then(async respObj => {
       await storeData(Constant.TOKEN, respObj.token);
-      await storeData(Constant.USER, respObj.user.role.name);
+      await storeData(Constant.USER, JSON.stringify(respObj.user));
       navigation.push("Home");
     }).catch(error => {
       setTimeout(async () => {
@@ -45,7 +45,7 @@ export default function LoginScreen({ navigation }) {
       <Formik initialValues={{ mobile: "", password: "" }} onSubmit={onLogin}
               validationSchema={validationSchema}>
         {({ handleChange, handleBlur, handleSubmit, values, touched, errors, isSubmitting }) => (
-          <VStack mx={6} space={4}>
+          <VStack mx={calculate(6)} space={calculate(4)}>
             <FormControl isRequired isInvalid={"mobile" in errors}>
               <FormControl.Label>Mobile</FormControl.Label>
               <Input

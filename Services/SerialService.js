@@ -1,43 +1,53 @@
-function openAndClose(cmdType, dataSize, data) {
-  let header = "55AA";
-  let checkSum = [];
-  let dataInHex = ("00" + parseInt(data).toString(16).toUpperCase()).slice(-2);
-  let cmd = header + dataSize + cmdType + dataInHex;
-  checkSum.push(dataSize);
-  checkSum.push(cmdType);
-  checkSum.push(dataInHex);
-  cmd += calculateCheckSum(checkSum);
-  console.log(formatHexMsg(cmd));
-  return cmd;
-}
+import { getData } from "./Utility";
+import * as Constant from "../Constants/Constant";
 
 export async function dispenseToken(serialCom, token, setMsg, setType) {
   setMsg("Sending command to token machine");
-  let cmd = constructHexCmd("C0", "04", token);
+  let user = await getData(Constant.USER);
+  let cmd;
+  if (user.mobile === 1) {
+    cmd = constructFEHeaderMsg("02", `${token}`);
+  } else {
+    cmd = constructHexCmd("C0", "04", token);
+  }
   return await executeCmd(serialCom, cmd, setMsg, setType);
 }
 
-export async function openOrCloseCashier(serialCom, open) {
+export async function openOrCloseCashier(serialCom, open, setMsg, setType) {
+  let user = await getData(Constant.USER);
   let cmd;
-  if (open) {
-    cmd = openAndClose("C1", "03", "01");
+  if (user.mobile === 1) {
+    if (open) {
+      cmd = constructFEHeaderMsg("01", "02");
+    } else {
+      cmd = constructFEHeaderMsg("01", "00");
+    }
   } else {
-    cmd = openAndClose("C1", "03", "00");
+    if (open) {
+      cmd = constructHexCmd("C2", "03", "01");
+    } else {
+      cmd = constructHexCmd("C2", "03", "00");
+    }
   }
-  await executeCmd(serialCom, cmd);
+
+  await executeCmd(serialCom, cmd, setMsg, setType);
 }
 
-function constructHexCmd(cmdType, dataSize, token) {
+function constructHexCmd(cmdType, dataSize, data) {
   let header = "55AA";
   let checkSum = [];
-  let tokensInHex = (
-    "0000" + parseInt(token).toString(16).toUpperCase()
-  ).slice(-4);
-  let cmd = header + dataSize + cmdType + tokensInHex;
+  let cmdInHex;
+  if (cmdType === "C0") {
+    cmdInHex = ("0000" + parseInt(data).toString(16).toUpperCase()).slice(-4);
+  } else if (cmdType === "C2") {
+    cmdInHex = ("00" + parseInt(data).toString(16).toUpperCase()).slice(-2);
+  }
+  // let tokensInHex = ("0000" + parseInt(data).toString(16).toUpperCase()).slice(-4);
+  let cmd = header + dataSize + cmdType + cmdInHex;
   checkSum.push(dataSize);
   checkSum.push(cmdType);
-  checkSum.push(tokensInHex.substring(0, 2));
-  checkSum.push(tokensInHex.substring(2, 4));
+  checkSum.push(cmdInHex.substring(0, 2));
+  checkSum.push(cmdInHex.substring(2, 4));
   cmd += calculateCheckSum(checkSum);
   console.log(formatHexMsg(cmd));
   return cmd;
@@ -79,4 +89,30 @@ function formatHexMsg(msg) {
     }
   }
   return out;
+}
+
+function constructFEHeaderMsg(cmdType, data) {
+  let header = "FE";
+  let tail = "EF";
+  let cmd = header + cmdType;
+  let checkSum = [];
+  checkSum.push(cmdType);
+  let sum = 0;
+  for (let i = data.length; i < 4; i++) {
+    cmd += "00";
+  }
+  for (let i = 0; i < data.length; i++) {
+    cmd += "0" + data[i];
+    checkSum.push("0" + data[i]);
+  }
+  for (let i = 0; i < checkSum.length; i++) {
+    sum = sum ^ parseInt(checkSum[i], 16);
+  }
+  sum = sum.toString(16);
+  if (sum.length === 1) {
+    sum = "0" + sum.toString(16);
+  }
+  cmd += sum + tail;
+  console.log(formatHexMsg(cmd));
+  return cmd;
 }

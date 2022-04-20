@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import getEnvironment from "./Environment";
 import * as Constant from "../Constants/Constant";
+import { USER } from "../Constants/Constant";
 
 const APIURL = getEnvironment.apiUrl;
 const APIVERSION = "v1/";
@@ -14,6 +15,10 @@ export const removeData = async (key) => {
 };
 
 export const getData = async (key) => {
+  if (key === USER) {
+    let user = await AsyncStorage.getItem(key);
+    return JSON.parse(user);
+  }
   return await AsyncStorage.getItem(key);
 };
 

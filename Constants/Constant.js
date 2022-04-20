@@ -1,5 +1,6 @@
 export const TOKEN = "token";
 export const USER = "user";
+export const MACHINE = "Machine";
 export const START = "START";
 export const RESET = "RESET";
 export const TICK = "TICK";
