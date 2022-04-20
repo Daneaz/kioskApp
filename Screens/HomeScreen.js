@@ -47,7 +47,6 @@ export default function HomeScreen({ navigation }) {
       dispatch({ type: CN });
     }
     setBackDoorCounter(backDoorCounter + 1);
-    console.log(backDoorCounter);
     if (backDoorCounter === 10) {
       await removeData(Constant.USER);
       await removeData(Constant.TOKEN);
