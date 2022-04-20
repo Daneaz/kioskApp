@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }) {
               validationSchema={validationSchema}>
         {({ handleChange, handleBlur, handleSubmit, values, touched, errors, isSubmitting }) => (
           <VStack mx={calculate(6)} space={calculate(4)}>
-            <FormControl isRequired isInvalid={"mobile" in errors}>
+            <FormControl isRequired isInvalid={"mobile" in errors} >
               <FormControl.Label>Mobile</FormControl.Label>
               <Input
                 keyboardType={"number-pad"}
