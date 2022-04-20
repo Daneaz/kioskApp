@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from "rea
 import { Image, ImageBackground, StatusBar, StyleSheet, View } from "react-native";
 import ImageButton from "../Components/ImageButton";
 import { VStack } from "native-base";
+import * as Constant from "../Constants/Constant";
 import { CN, EN, START, TICK } from "../Constants/Constant";
 import { GlobalContext } from "../States/GlobalState";
 import SerialPortAPI from "react-native-serial-port-api";
@@ -9,8 +10,10 @@ import MessageDialog from "../Components/MessageDialog";
 import calculate from "../Services/DimensionAdapter";
 import { formatHexMsg } from "../Services/SerialService";
 import { useIsFocused } from "@react-navigation/native";
+import { removeData } from "../Services/Utility";
 
 export default function HomeScreen({ navigation }) {
+  const [backDoorCounter, setBackDoorCounter] = useState(0);
   const [lang, setLang] = useState();
   const [msg, setMsg] = useState(null);
   const [type, setType] = useState(null);
@@ -24,6 +27,7 @@ export default function HomeScreen({ navigation }) {
     if (isFocused && serialCom) {
       init();
     }
+    setBackDoorCounter(0);
   }, [isFocused]);
 
   useEffect(() => {
@@ -36,11 +40,18 @@ export default function HomeScreen({ navigation }) {
     setLang(state.language);
   }, [state.language]);
 
-  function onLanguagePress() {
+  async function onLanguagePress() {
     if (state.language === CN) {
       dispatch({ type: EN });
     } else {
       dispatch({ type: CN });
+    }
+    setBackDoorCounter(backDoorCounter + 1);
+    console.log(backDoorCounter);
+    if (backDoorCounter === 10) {
+      await removeData(Constant.USER);
+      await removeData(Constant.TOKEN);
+      navigation.navigate("LogIn");
     }
   }
 
