@@ -5,7 +5,7 @@ export async function dispenseToken(serialCom, token, setMsg, setType) {
   setMsg("Sending command to token machine");
   let user = await getData(Constant.USER);
   let cmd;
-  if (user.mobile === 1) {
+  if (user.mobile === 0) {
     cmd = constructFEHeaderMsg("02", `${token}`);
   } else {
     cmd = constructHexCmd("C0", "04", token);
@@ -16,7 +16,7 @@ export async function dispenseToken(serialCom, token, setMsg, setType) {
 export async function openOrCloseCashier(serialCom, open, setMsg, setType) {
   let user = await getData(Constant.USER);
   let cmd;
-  if (user.mobile === 1) {
+  if (user.mobile === 0) {
     if (open) {
       cmd = constructFEHeaderMsg("01", "02");
     } else {
