@@ -88,7 +88,8 @@ export default function HomeScreen({ navigation }) {
             imageBtnStyle={styles.buttons}
             onPress={() => {
               setType("INFO");
-              setMsg("Coming Soon!!! Please use our Play United App to purchase now");
+              state.language === CN ?
+                setMsg("正在努力实现中。。。请用手机 App 购买") : setMsg("Coming Soon!!! Please use our Play United App to purchase now");
               // navigation.navigate("Purchase");
               // dispatch({ type: START });
               // timer.current = setInterval(() => dispatch({ type: TICK }), 1000);

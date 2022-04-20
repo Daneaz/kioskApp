@@ -126,7 +126,7 @@ export default function QRCodeScreen({ route }) {
         <HStack justifyContent={"center"}>
           <ImageBackground source={require("../Assets/Images/qr-code-bg.png")} style={styles.image}>
             <HStack justifyContent={"center"} marginTop={calculate(18)}>
-              {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={570} />}
+              {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={calculate(142)} />}
             </HStack>
           </ImageBackground>
         </HStack>
@@ -141,7 +141,7 @@ export default function QRCodeScreen({ route }) {
 
 const styles = StyleSheet.create({
   image: {
-    width: calculate(255),
+    width: calculate(266),
     height: calculate(255),
   },
   text: {

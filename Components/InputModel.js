@@ -16,7 +16,7 @@ export default function InputModel(props) {
 
   const navigation = useNavigation();
 
-  const [state, dispatch] = useContext(GlobalContext);
+  const [state] = useContext(GlobalContext);
 
   function handleInputChange(num) {
     setToken(token.concat(num));
@@ -26,13 +26,17 @@ export default function InputModel(props) {
     setToken(token.slice(0, -1));
   }
 
+  function handleClear() {
+    setToken("");
+  }
+
   return (
     <Modal isOpen={props.open} onClose={props.close}>
       <ImageBackground source={require("../Assets/Images/msg-dialog-holder-input.png")}
                        style={styles.common}>
         <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={styles.close}
                      onPress={props.close} />
-        <VStack alignItems={"center"} paddingTop={calculate(10)}>
+        <VStack alignItems={"center"} paddingTop={150}>
           <Input placeholder={state.language === CN ? "请输入您的取币数量" : "Please enter the amount of tokens"}
                  size={calculate(10)}
                  placeholderTextColor={Colors.inputTextColor}
@@ -62,16 +66,18 @@ export default function InputModel(props) {
                          onPress={() => handleInputChange("9")} />
           </HStack>
           <HStack space={calculate(5)}>
-
+            <ImageButton source={require("../Assets/Images/clear.png")}
+                         imageBtnStyle={styles.numbers}
+                         onPress={() => handleClear()} />
             <ImageButton source={require("../Assets/Images/number0.png")}
-                         imageBtnStyle={{ ...styles.numbers, marginLeft: calculate(65) }}
+                         imageBtnStyle={styles.numbers}
                          onPress={() => handleInputChange("0")} />
             <ImageButton source={require("../Assets/Images/delete.png")} imageBtnStyle={styles.delete}
                          onPress={() => handleDelete()} />
           </HStack>
           <TextEnrichImageButton source={require("../Assets/Images/msg-dialog-btn-input.png")}
                                  imageBtnStyle={styles.btn}
-                                 text={"Confirm"}
+                                 text={state.language === CN ? "确认" : "Confirm"}
                                  imageBtnTextStyle={styles.infoText}
                                  onPress={() => {
                                    if (parseInt(token) > 0) {
@@ -131,6 +137,6 @@ const styles = StyleSheet.create({
   delete: {
     width: calculate(43),
     height: calculate(38),
-    marginLeft: calculate(2),
+    marginLeft: calculate(5),
   },
 });
