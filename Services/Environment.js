@@ -6,17 +6,17 @@ const uatUrl = "http://13.250.40.143:5000";
 const prodUrl = "http://13.250.40.143:8000";
 const ENVURL = {
     dev: {
-        envName: "DEVELOPMENT",
+        envName: "DEV",
         apiUrl: "http://192.168.1.199:5000",
         s3Url: S3UatUrl,
     },
-    staging: {
-        envName: "STAGING",
+    uat: {
+        envName: "UAT",
         apiUrl: uatUrl,
         s3Url: S3UatUrl,
     },
     prod: {
-        envName: "PRODUCTION",
+        envName: "PROD",
         apiUrl: prodUrl,
         s3Url: S3ProdUrl,
     },
@@ -27,7 +27,7 @@ function getEnvironment() {
     if (ENV === "PROD") {
         return ENVURL.prod; // prod env settings
     } else if (ENV === "UAT") {
-        return ENVURL.staging; // stage env settings
+        return ENVURL.uat; // stage env settings
     } else {
         return ENVURL.dev; // dev env settings
     }

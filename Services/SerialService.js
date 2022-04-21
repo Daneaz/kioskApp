@@ -68,12 +68,20 @@ async function executeCmd(serialCom, cmd, setMsg, setType) {
     await serialCom.current.send(cmd);
     setType("SUCCESS");
     setMsg("Dispensing token...");
+    serialCom.current.onReceived(buff => handlerReceived(buff, setMsg, setType));
     return true;
   } catch (error) {
     setType("ERROR");
     setMsg(JSON.stringify(error));
     return false;
   }
+}
+
+function handlerReceived(buff, setMsg, setType) {
+  let hex = formatHexMsg(buff.toString("hex").toUpperCase());
+  console.log("Received", hex);
+  setMsg(hex);
+  setType("INFO");
 }
 
 

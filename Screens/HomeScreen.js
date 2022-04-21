@@ -10,7 +10,7 @@ import MessageDialog from "../Components/MessageDialog";
 import calculate from "../Services/DimensionAdapter";
 import { formatHexMsg } from "../Services/SerialService";
 import { useIsFocused } from "@react-navigation/native";
-import { removeData } from "../Services/Utility";
+import { getData, removeData } from "../Services/Utility";
 
 export default function HomeScreen({ navigation }) {
   const [backDoorCounter, setBackDoorCounter] = useState(0);
@@ -20,11 +20,11 @@ export default function HomeScreen({ navigation }) {
   const [state, dispatch] = useContext(GlobalContext);
 
   const timer = useRef();
-  const serialCom = useRef();
+  const serialCom = useRef(null);
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused && serialCom) {
+    if (isFocused && !serialCom.current) {
       init();
     }
     setBackDoorCounter(0);
@@ -56,10 +56,17 @@ export default function HomeScreen({ navigation }) {
 
   async function init() {
     try {
-      serialCom.current = await SerialPortAPI.open("/dev/ttyS2", {
+      let port;
+      let user = await getData(Constant.USER);
+      if(user.mobile === 0){
+        port = "/dev/ttyS2";
+      } else {
+        port = "/dev/ttyS3";
+      }
+      serialCom.current = await SerialPortAPI.open(port, {
         baudRate: 115200,
       });
-      serialCom.current.onReceived(handlerReceived);
+      // serialCom.current.onReceived(handlerReceived);
 
     } catch (error) {
       setType("ERROR");

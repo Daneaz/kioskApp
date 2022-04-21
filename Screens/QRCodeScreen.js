@@ -120,12 +120,12 @@ export default function QRCodeScreen({ route }) {
 
   return (
     <BasicLayout
-      source={lang === CN ? require("../Assets/Images/purchase-bg-cn.png") : require("../Assets/Images/purchase-bg-en.png")}
+      source={lang === CN ? require("../Assets/Images/retrieve-bg-cn.png") : require("../Assets/Images/retrieve-bg-en.png")}
       text={state.time}>
       <VStack space={20} alignItems="center" paddingTop={5}>
         <HStack justifyContent={"center"}>
           <ImageBackground source={require("../Assets/Images/qr-code-bg.png")} style={styles.image}>
-            <HStack justifyContent={"center"} marginTop={calculate(18)}>
+            <HStack justifyContent={"center"} style={styles.qrCode}>
               {qrCode && <QRCode value={qrCode} logo={require("../Assets/Images/icon.png")} size={calculate(142)} />}
             </HStack>
           </ImageBackground>
@@ -147,5 +147,11 @@ const styles = StyleSheet.create({
   text: {
     textAlign: "center",
     maxWidth: calculate(200),
+  },
+  qrCode: {
+    justifyContent: "center",
+    position: "absolute",
+    marginLeft: calculate(65),
+    marginTop: calculate(72)
   },
 });

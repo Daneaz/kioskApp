@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
-import { ImageBackground, StyleSheet } from "react-native";
-import { HStack, Input, Modal, VStack } from "native-base";
+import { ImageBackground, StyleSheet, TextInput } from "react-native";
+import { HStack, Modal, VStack } from "native-base";
 import ImageButton from "./ImageButton";
 import Colors from "../Constants/Colors";
 import MessageDialog from "./MessageDialog";
@@ -36,9 +36,8 @@ export default function InputModel(props) {
                        style={styles.common}>
         <ImageButton source={require("../Assets/Images/msg-dialog-close-blue.png")} imageBtnStyle={styles.close}
                      onPress={props.close} />
-        <VStack alignItems={"center"} paddingTop={150}>
-          <Input placeholder={state.language === CN ? "请输入您的取币数量" : "Please enter the amount of tokens"}
-                 size={calculate(10)}
+        <VStack alignItems={"center"} paddingTop={calculate(8)}>
+          <TextInput placeholder={state.language === CN ? "请输入您的取币数量" : "Please enter the amount of tokens"}
                  placeholderTextColor={Colors.inputTextColor}
                  style={styles.input} showSoftInputOnFocus={false} value={token} />
           <HStack space={calculate(5)}>
@@ -108,6 +107,8 @@ const styles = StyleSheet.create({
     height: calculate(37),
   },
   input: {
+    width: calculate(40),
+    height: calculate(40),
     marginBottom: calculate(15),
     textAlign: "center",
     minWidth: "75%",

@@ -17,11 +17,10 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     async function getUser() {
       let user = await getData(Constant.USER);
-      if (user.role.name === Constant.MACHINE) {
+      if (user !== null && user.role.name === Constant.MACHINE) {
         navigation.navigate("Home");
       }
     }
-
     getUser();
   }, []);
 
@@ -46,7 +45,7 @@ export default function LoginScreen({ navigation }) {
               validationSchema={validationSchema}>
         {({ handleChange, handleBlur, handleSubmit, values, touched, errors, isSubmitting }) => (
           <VStack mx={calculate(6)} space={calculate(4)}>
-            <FormControl isRequired isInvalid={"mobile" in errors} >
+            <FormControl isRequired isInvalid={"mobile" in errors}>
               <FormControl.Label>Mobile</FormControl.Label>
               <Input
                 keyboardType={"number-pad"}
