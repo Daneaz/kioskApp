@@ -38,8 +38,8 @@ export default function InputModel(props) {
                      onPress={props.close} />
         <VStack alignItems={"center"} paddingTop={calculate(8)}>
           <TextInput placeholder={state.language === CN ? "请输入您的取币数量" : "Please enter the amount of tokens"}
-                 placeholderTextColor={Colors.inputTextColor}
-                 style={styles.input} showSoftInputOnFocus={false} value={token} />
+                     placeholderTextColor={Colors.inputTextColor}
+                     style={styles.input} showSoftInputOnFocus={false} value={token} />
           <HStack space={calculate(5)}>
             <ImageButton source={require("../Assets/Images/number1.png")} imageBtnStyle={styles.numbers}
                          onPress={() => handleInputChange("1")} />
@@ -79,7 +79,9 @@ export default function InputModel(props) {
                                  text={state.language === CN ? "确认" : "Confirm"}
                                  imageBtnTextStyle={styles.infoText}
                                  onPress={() => {
-                                   if (parseInt(token) > 0) {
+                                   if (parseInt(token) > 1000) {
+                                     setMsg(state.language === CN ? "最大取币数量为1000" : "Max is 1000 tokens");
+                                   } else if (parseInt(token) > 0) {
                                      navigation.navigate("QRCode", { token: token, serialCom: props.serialCom });
                                      setToken("");
                                      props.close();
