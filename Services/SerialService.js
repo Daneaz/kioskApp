@@ -42,7 +42,7 @@ function constructHexCmd(cmdType, dataSize, data) {
   } else if (cmdType === "C2") {
     cmdInHex = ("00" + parseInt(data).toString(16).toUpperCase()).slice(-2);
   }
-  // let tokensInHex = ("0000" + parseInt(data).toString(16).toUpperCase()).slice(-4);
+
   let cmd = header + dataSize + cmdType + cmdInHex;
   checkSum.push(dataSize);
   checkSum.push(cmdType);
@@ -67,7 +67,7 @@ async function executeCmd(serialCom, cmd, setMsg, setType) {
   try {
     await serialCom.current.send(cmd);
     setType("SUCCESS");
-    setMsg("Dispensing token...");
+    setMsg(`Dispensing ${convertToDecimal(cmd)} token...`);
     serialCom.current.onReceived(buff => handlerReceived(buff, setMsg, setType));
     return true;
   } catch (error) {
@@ -80,10 +80,18 @@ async function executeCmd(serialCom, cmd, setMsg, setType) {
 function handlerReceived(buff, setMsg, setType) {
   let hex = formatHexMsg(buff.toString("hex").toUpperCase());
   console.log("Received", hex);
-  setMsg(hex);
-  setType("INFO");
+  if (hex === "55AA04C00000C4") {
+    setMsg(`All tokens has been dispensed...`);
+  } else {
+    setMsg(`Dispensed ${convertToDecimal(hex)} tokens`);
+  }
 }
 
+function convertToDecimal(hex) {
+  let dispensedToken = parseInt(hex.substring(8, 12), 16);
+  console.log(dispensedToken);
+  return dispensedToken;
+}
 
 function formatHexMsg(msg) {
   let out = "";
