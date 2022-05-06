@@ -49,7 +49,7 @@ function constructHexCmd(cmdType, dataSize, data) {
   checkSum.push(cmdInHex.substring(0, 2));
   checkSum.push(cmdInHex.substring(2, 4));
   cmd += calculateCheckSum(checkSum);
-  console.log(formatHexMsg(cmd));
+  console.log(`cmd: ${formatHexMsg(cmd)}`);
   return cmd;
 }
 
@@ -59,7 +59,7 @@ function calculateCheckSum(checkSum) {
   for (let i = 0; i < checkSum.length; i++) {
     sum = sum ^ parseInt(checkSum[i], 16);
   }
-  sum = sum.toString(16).toUpperCase();
+  sum =  ("00" + sum.toString(16).toUpperCase()).slice(-2);
   return sum;
 }
 
@@ -78,8 +78,8 @@ async function executeCmd(serialCom, cmd, setMsg, setType) {
 }
 
 function handlerReceived(buff, setMsg, setType) {
-  let hex = formatHexMsg(buff.toString("hex").toUpperCase());
-  console.log("Received", hex);
+  let hex = buff.toString("hex").toUpperCase();
+  console.log("Received", formatHexMsg(hex));
   if (hex === "55AA04C00000C4") {
     setMsg(`All tokens has been dispensed...`);
   } else {
