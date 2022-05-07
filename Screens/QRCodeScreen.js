@@ -7,11 +7,12 @@ import QRCode from "react-native-qrcode-svg";
 import { fetchAPI } from "../Services/Utility";
 import MessageDialog from "../Components/MessageDialog";
 import { GlobalContext } from "../States/GlobalState";
-import { CN } from "../Constants/Constant";
+import { CN, CREATED, SUCCESS } from "../Constants/Constant";
 import calculate from "../Services/DimensionAdapter";
 import { dispenseToken } from "../Services/SerialService";
 
 export default function QRCodeScreen({ route }) {
+  const [status, setStatus] = useState(CREATED);
   const [qrCode, setQrCode] = useState(null);
   const [transId, setTransId] = useState(null);
   const [msg, setMsg] = useState(null);
@@ -35,7 +36,7 @@ export default function QRCodeScreen({ route }) {
 
   useEffect(() => {
     return async () => {
-      if (transId)
+      if (transId && status === CREATED)
         await pushStatusToFail(transId);
     };
   }, [transId]);
@@ -63,6 +64,7 @@ export default function QRCodeScreen({ route }) {
     try {
       let token = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
       if (token) {
+        setStatus(SUCCESS);
         clearInterval(statusTimer.current);
         setType("SUCCESS");
         setMsg("Payment success!!!");
@@ -79,7 +81,7 @@ export default function QRCodeScreen({ route }) {
 
   async function handleDispenseToken(transId, token) {
     try {
-      let result = await dispenseToken(route.params.serialCom, token, setMsg, setType);
+      let result = await dispenseToken(route.params.serialCom, token, setMsg, setType, lang);
       if (result) {
         await pushStatusToSuccess(transId);
       } else {

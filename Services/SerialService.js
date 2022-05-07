@@ -1,8 +1,9 @@
 import { getData } from "./Utility";
 import * as Constant from "../Constants/Constant";
+import { CN } from "../Constants/Constant";
 
-export async function dispenseToken(serialCom, token, setMsg, setType) {
-  setMsg("Sending command to token machine");
+export async function dispenseToken(serialCom, token, setMsg, setType, lang) {
+  setMsg(lang === CN ? "正在发送命令。。。" : "Sending command to token machine");
   let user = await getData(Constant.USER);
   let cmd;
   if (user.mobile === 0) {
@@ -10,7 +11,7 @@ export async function dispenseToken(serialCom, token, setMsg, setType) {
   } else {
     cmd = constructHexCmd("C0", "04", token);
   }
-  return await executeCmd(serialCom, cmd, setMsg, setType);
+  return await executeCmd(serialCom, cmd, setMsg, setType, lang);
 }
 
 export async function openOrCloseCashier(serialCom, open, setMsg, setType) {
@@ -63,12 +64,12 @@ function calculateCheckSum(checkSum) {
   return sum;
 }
 
-async function executeCmd(serialCom, cmd, setMsg, setType) {
+async function executeCmd(serialCom, cmd, setMsg, setType, lang) {
   try {
     await serialCom.current.send(cmd);
     setType("SUCCESS");
-    setMsg(`Dispensing ${convertToDecimal(cmd)} token...`);
-    serialCom.current.onReceived(buff => handlerReceived(buff, setMsg, setType));
+    setMsg(lang === CN ? `${convertToDecimal(cmd)}个币，出币中。。。` : `Dispensing ${convertToDecimal(cmd)} token...`);
+    serialCom.current.onReceived(buff => handlerReceived(buff, setMsg, lang));
     return true;
   } catch (error) {
     setType("ERROR");
@@ -77,13 +78,13 @@ async function executeCmd(serialCom, cmd, setMsg, setType) {
   }
 }
 
-function handlerReceived(buff, setMsg, setType) {
+function handlerReceived(buff, setMsg, lang) {
   let hex = buff.toString("hex").toUpperCase();
   console.log("Received", formatHexMsg(hex));
   if (hex === "55AA04C00000C4") {
-    setMsg(`All tokens has been dispensed...`);
+    setMsg(lang === CN ? "出币完毕" : `All tokens has been dispensed`);
   } else {
-    setMsg(`Dispensed ${convertToDecimal(hex)} tokens`);
+    setMsg(lang === CN ? `库存不足，请联系工作人员补币。 已出${convertToDecimal(hex)}个币` : `Not enough token, please contact our staff to add more tokens. Dispensed ${convertToDecimal(hex)} tokens`);
   }
 }
 
