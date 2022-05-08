@@ -10,9 +10,13 @@ import { ENV } from "@env";
 import MessageDialog from "../Components/MessageDialog";
 import * as Constant from "../Constants/Constant";
 import calculate from "../Services/DimensionAdapter";
+import codePush from "react-native-code-push";
+import { useIsFocused } from "@react-navigation/native";
+
 
 export default function LoginScreen({ navigation }) {
   const [msg, setMsg] = useState(null);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     async function getUser() {
@@ -24,10 +28,22 @@ export default function LoginScreen({ navigation }) {
     getUser();
   }, []);
 
+  useEffect(() => {
+    checkForUpdate();
+  }, [isFocused]);
+
+  function checkForUpdate() {
+    codePush.sync({
+      updateDialog: true,
+      installMode: codePush.InstallMode.IMMEDIATE,
+    });
+  }
+
   function onLogin(values, actions) {
     fetchAPI("POST", "authMgt/auth", values).then(async respObj => {
       await storeData(Constant.TOKEN, respObj.token);
       await storeData(Constant.USER, JSON.stringify(respObj.user));
+      actions.setSubmitting(false);
       navigation.push("Home");
     }).catch(error => {
       setTimeout(async () => {
@@ -80,7 +96,7 @@ export default function LoginScreen({ navigation }) {
             </Button>
             <View style={styles.rowContent}>
               <Text style={{ fontSize: calculate(10) }}>
-                {`${ENV} Build Version: 20220328`}</Text>
+                {`${ENV} Build Version: 20220508`}</Text>
             </View>
           </VStack>
         )}

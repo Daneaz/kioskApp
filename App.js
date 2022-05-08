@@ -18,9 +18,10 @@ import RetrieveTokenScreen from "./Screens/RetrieveTokenScreen";
 import QRCodeScreen from "./Screens/QRCodeScreen";
 import FOMOPayScreen from "./Screens/FOMOPayScreen";
 import DisconnectScreen from "./Screens/DisconnectScreen";
+import codePush from "react-native-code-push";
 
-export default function App() {
-
+let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
+function App() {
   const AuthStack = createStackNavigator();
 
   function AuthStackScreen() {
@@ -48,3 +49,5 @@ export default function App() {
   );
 
 }
+
+export default App = codePush(codePushOptions)(App);
