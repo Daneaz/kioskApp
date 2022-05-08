@@ -3,14 +3,14 @@ import { CN, EN, RESET, START, TICK } from "../Constants/Constant";
 
 export const GlobalContext = createContext();
 
-const initialState = { time: 240, isRunning: false, language: EN };
+const initialState = { time: 300, isRunning: false, language: EN };
 
 const reducer = (state, action) => {
   switch (action.type) {
     case START:
       return { ...state, isRunning: true };
     case RESET:
-      return { ...state, isRunning: false, time: 240 };
+      return { ...state, isRunning: false, time: 300 };
     case TICK:
       return { ...state, time: state.time - 1 };
     case CN:
