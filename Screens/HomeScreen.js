@@ -104,7 +104,7 @@ export default function HomeScreen({ navigation }) {
           resizeMode={"stretch"}
           style={styles.backgroundVideo}
           controls={false}
-          paused={activeIndex !== item.id}
+          paused={activeIndex !== item.id || !isFocused}
           playInBackground={false}
           onEnd={() => carousel.current.snapToNext()}
           repeat={true} />
