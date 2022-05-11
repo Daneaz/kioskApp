@@ -51,8 +51,9 @@ export default function QRCodeScreen({ route }) {
       };
       setQrCode(JSON.stringify(code));
       setTransId(result._id);
+      let startTime = new Date();
       statusTimer.current = setInterval(() => {
-        checkStatus(result._id);
+        checkStatus(result._id, startTime);
       }, 5000);
     } catch (err) {
       setType("ERROR");
@@ -60,8 +61,15 @@ export default function QRCodeScreen({ route }) {
     }
   }
 
-  async function checkStatus(transId) {
+  async function checkStatus(transId, startTime) {
+
     try {
+      let expiredTime = startTime.getTime() + 5 * 60000;
+      if(expiredTime < new Date().getTime()){
+        clearInterval(statusTimer.current);
+        await pushStatusToFail(transId);
+      }
+
       let token = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
       if (token) {
         setStatus(SUCCESS);
