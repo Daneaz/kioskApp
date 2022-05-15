@@ -7,7 +7,7 @@ import QRCode from "react-native-qrcode-svg";
 import { fetchAPI } from "../Services/Utility";
 import MessageDialog from "../Components/MessageDialog";
 import { GlobalContext } from "../States/GlobalState";
-import { CN, CREATED, SUCCESS } from "../Constants/Constant";
+import { CN, CREATED, DISPENSING, SUCCESS } from "../Constants/Constant";
 import calculate from "../Services/DimensionAdapter";
 import { dispenseToken } from "../Services/SerialService";
 
@@ -65,14 +65,14 @@ export default function QRCodeScreen({ route }) {
 
     try {
       let expiredTime = startTime.getTime() + 5 * 60000;
-      if(expiredTime < new Date().getTime()){
+      if (expiredTime < new Date().getTime()) {
         clearInterval(statusTimer.current);
         await pushStatusToFail(transId);
       }
 
       let token = await fetchAPI("GET", `tokenRetrieveMgt/checkStatusAndUpdate/${transId}`);
       if (token) {
-        setStatus(SUCCESS);
+        setStatus(DISPENSING);
         clearInterval(statusTimer.current);
         setType("SUCCESS");
         setMsg("Payment success!!!");
@@ -89,35 +89,13 @@ export default function QRCodeScreen({ route }) {
 
   async function handleDispenseToken(transId, token) {
     try {
-      let result = await dispenseToken(route.params.serialCom, token, setMsg, setType, lang);
-      if (result) {
-        await pushStatusToSuccess(transId);
-      } else {
-        await proceedWithRefund(transId);
-      }
+      await dispenseToken(route.params.serialCom, transId, token, setMsg, setType, lang);
     } catch (error) {
       setType("ERROR");
       setMsg(JSON.stringify(error));
     }
   }
 
-  async function proceedWithRefund(transId) {
-    try {
-      await fetchAPI("GET", `tokenRetrieveMgt/refund/${transId}`);
-    } catch (err) {
-      setType("ERROR");
-      setMsg(err);
-    }
-  }
-
-  async function pushStatusToSuccess(transId) {
-    try {
-      await fetchAPI("GET", `tokenRetrieveMgt/pushToSuccess/${transId}`);
-    } catch (err) {
-      setType("ERROR");
-      setMsg(err);
-    }
-  }
 
   async function pushStatusToFail(transId) {
     try {
@@ -162,6 +140,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "absolute",
     marginLeft: calculate(65),
-    marginTop: calculate(72)
+    marginTop: calculate(72),
   },
 });

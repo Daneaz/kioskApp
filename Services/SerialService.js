@@ -1,8 +1,8 @@
-import { getData } from "./Utility";
+import { fetchAPI, getData } from "./Utility";
 import * as Constant from "../Constants/Constant";
 import { CN } from "../Constants/Constant";
 
-export async function dispenseToken(serialCom, token, setMsg, setType, lang) {
+export async function dispenseToken(serialCom, transId, token, setMsg, setType, lang) {
   setMsg(lang === CN ? "正在发送命令。。。" : "Sending command to token machine");
   let user = await getData(Constant.USER);
   let cmd;
@@ -11,7 +11,7 @@ export async function dispenseToken(serialCom, token, setMsg, setType, lang) {
   } else {
     cmd = constructHexCmd("C0", "04", token);
   }
-  return await executeCmd(serialCom, cmd, setMsg, setType, lang);
+  return await executeCmd(serialCom, cmd, transId, setMsg, setType, lang);
 }
 
 export async function openOrCloseCashier(serialCom, open, setMsg, setType) {
@@ -60,31 +60,32 @@ function calculateCheckSum(checkSum) {
   for (let i = 0; i < checkSum.length; i++) {
     sum = sum ^ parseInt(checkSum[i], 16);
   }
-  sum =  ("00" + sum.toString(16).toUpperCase()).slice(-2);
+  sum = ("00" + sum.toString(16).toUpperCase()).slice(-2);
   return sum;
 }
 
-async function executeCmd(serialCom, cmd, setMsg, setType, lang) {
+async function executeCmd(serialCom, cmd, transId, setMsg, setType, lang) {
   try {
     await serialCom.current.send(cmd);
     setType("SUCCESS");
     setMsg(lang === CN ? `${convertToDecimal(cmd)}个币，出币中。。。` : `Dispensing ${convertToDecimal(cmd)} token...`);
-    serialCom.current.onReceived(buff => handlerReceived(buff, setMsg, lang));
-    return true;
+    serialCom.current.onReceived(buff => handlerReceived(buff, transId, setMsg, setType, lang));
   } catch (error) {
     setType("ERROR");
     setMsg(JSON.stringify(error));
-    return false;
   }
 }
 
-function handlerReceived(buff, setMsg, lang) {
+async function handlerReceived(buff, transId, setMsg, setType, lang) {
   let hex = buff.toString("hex").toUpperCase();
   console.log("Received", formatHexMsg(hex));
   if (hex === "55AA04C00000C4") {
     setMsg(lang === CN ? "出币完毕" : `All tokens has been dispensed`);
+    await pushStatusToSuccess(transId, setMsg, setType);
   } else {
-    setMsg(lang === CN ? `库存不足，请联系工作人员补币。 已出${convertToDecimal(hex)}个币` : `Not enough token, please contact our staff to add more tokens. Dispensed ${convertToDecimal(hex)} tokens`);
+    let dispensedToken = convertToDecimal(hex);
+    setMsg(lang === CN ? `库存不足，请联系工作人员补币。 已出${dispensedToken}个币` : `Not enough token, please contact our staff to add more tokens. Dispensed ${dispensedToken} tokens`);
+    await proceedWithInterrupt(transId, dispensedToken, setMsg, setType);
   }
 }
 
@@ -132,4 +133,22 @@ function constructFEHeaderMsg(cmdType, data) {
   cmd += sum + tail;
   console.log(formatHexMsg(cmd));
   return cmd;
+}
+
+async function proceedWithInterrupt(transId, dispensedToken, setType, setMsg) {
+  try {
+    await fetchAPI("GET", `tokenRetrieveMgt/pushToInterrupt/${transId}/${dispensedToken}`);
+  } catch (err) {
+    setType("ERROR");
+    setMsg(err);
+  }
+}
+
+async function pushStatusToSuccess(transId, setMsg, setType) {
+  try {
+    await fetchAPI("GET", `tokenRetrieveMgt/pushToSuccess/${transId}`);
+  } catch (err) {
+    setType("ERROR");
+    setMsg(err);
+  }
 }
