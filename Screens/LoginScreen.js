@@ -96,7 +96,7 @@ export default function LoginScreen({ navigation }) {
             </Button>
             <View style={styles.rowContent}>
               <Text style={{ fontSize: calculate(10) }}>
-                {`${ENV} Build Version: 20220508`}</Text>
+                {`${ENV} Build Version: 20220516`}</Text>
             </View>
           </VStack>
         )}
