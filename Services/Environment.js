@@ -2,8 +2,8 @@ import { ENV } from "@env";
 
 export const S3UatUrl = "https://playuniteduat.s3.ap-southeast-1.amazonaws.com/";
 export const S3ProdUrl = "https://playunitedprod.s3.ap-southeast-1.amazonaws.com/";
-const uatUrl = "http://13.250.40.143:5000";
-const prodUrl = "http://13.250.40.143:8000";
+const uatUrl = "http://18.141.245.191:5000";
+const prodUrl = "https://mobile.playunitedsg.com";
 const ENVURL = {
     dev: {
         envName: "DEV",
