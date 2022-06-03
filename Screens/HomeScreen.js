@@ -18,12 +18,7 @@ const DATA = [
   {
     id: 0,
     mediaType: "video",
-    imgUrl: {uri: "https://playunitedprod.s3.ap-southeast-1.amazonaws.com/videos/banner-video.mov"},
-  },
-  {
-    id: 1,
-    mediaType: "video",
-    imgUrl: {uri: "https://playunitedprod.s3.ap-southeast-1.amazonaws.com/videos/retrive-token.mp4"},
+    imgUrl: require("../Assets/Images/banner-video.mov"),
   },
 ];
 
