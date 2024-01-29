@@ -22,6 +22,20 @@ export const getData = async (key) => {
   return await AsyncStorage.getItem(key);
 };
 
+export const storeKey = async (key, value) => {
+  await AsyncStorage.setItem(key, value);
+};
+
+export const getKey = async (key) => {
+  await AsyncStorage.removeItem(key);
+};
+
+export const clearAllData = async () => {
+  let user = await AsyncStorage.getItem(USER);
+  await AsyncStorage.clear();
+  await AsyncStorage.setItem(USER, user);
+};
+
 //RESTful API fetch
 const getApiUrl = (path) => {
   return `${APIURL}/api${path.startsWith("/") ? "" : "/"}${path}`;
